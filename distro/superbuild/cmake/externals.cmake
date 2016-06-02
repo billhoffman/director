@@ -23,7 +23,11 @@ set(default_cmake_args
   )
 
 # Find required external dependencies
-find_package(Qt4 4.8 REQUIRED)
+if (NOT WIN32)
+  find_package(Qt4 4.8 REQUIRED)
+else()
+  # fletch qt
+endif()	
 
 set(qt_args
   -DQT_QMAKE_EXECUTABLE:PATH=${QT_QMAKE_EXECUTABLE}
@@ -149,9 +153,18 @@ endif()
 
 ###############################################################################
 # PythonQt
+if (NOT WIN32)
+  set(PYTHONQT_REPO https://github.com/commontk/PythonQt.git)
+  set(PYTHONQT_TAG 00e6c6b2)	
+else()
+  # For Windows, we have to point to a specific version of PythonQt that
+  # has a patch to allow it to build with MSVC.	
+  set(VTK_REPO https://github.com/mwoehlke-kitware/PythonQt/)
+  set(VTK_TAG e463adc5a768)
+endif()	
 ExternalProject_Add(PythonQt
-  GIT_REPOSITORY https://github.com/commontk/PythonQt.git
-  GIT_TAG 00e6c6b2
+  GIT_REPOSITORY ${PYTHONQT_REPO}
+  GIT_TAG ${PYTHONQT_TAG}
   CMAKE_CACHE_ARGS
     ${default_cmake_args}
     ${qt_args}
@@ -187,13 +200,23 @@ ExternalProject_Add(QtPropertyBrowser
 
 ###############################################################################
 # vtk
-set(use_system_vtk_default ON)
-option(USE_SYSTEM_VTK "Use system version of VTK.  If off, VTK will be built." ${use_system_vtk_default})
+if (NOT WIN32)
+  set(use_system_vtk_default ON)
+  option(USE_SYSTEM_VTK "Use system version of VTK.  If off, VTK will be built." ${use_system_vtk_default})
+  set(VTK_REPO https://github.com/bilke/VTK.git)
+  set(VTK_TAG b753b7f)	
+else()
+  # If we are on Windows, we have to use a specific version of VTK.	
+  set(use_system_vtk_default OFF)
+  option(USE_SYSTEM_VTK "Use system version of VTK.  If off, VTK will be built." ${use_system_vtk_default})
+  set(VTK_REPO https://github.com/billhoffman/VTK)
+  set(VTK_TAG 1dffa3b)
+endif()	
 
 if(NOT USE_SYSTEM_VTK)
   ExternalProject_Add(vtk
-    GIT_REPOSITORY https://github.com/bilke/VTK.git
-    GIT_TAG b753b7f # vtk 5.10 with fixes for Visual Studio 2013
+    GIT_REPOSITORY ${VTK_REPO}
+    GIT_TAG ${VTK_TAG}
     CMAKE_CACHE_ARGS
       ${default_cmake_args}
       ${python_args}
@@ -211,7 +234,7 @@ if(NOT USE_SYSTEM_VTK)
   set(vtk_args -DVTK_DIR:PATH=${install_prefix}/lib/vtk-5.10)
   set(vtk_depends vtk)
 else()
-
+  # Maybe should error if we are on Windows here, but won't do that for now.
   set(vtk_homebrew_dir /usr/local/opt/vtk5/lib/vtk-5.10)
   if (APPLE AND IS_DIRECTORY ${vtk_homebrew_dir})
     set(vtk_args -DVTK_DIR:PATH=${vtk_homebrew_dir})
