@@ -28,6 +28,7 @@ if(WIN32)
   GIT_TAG "master"
   CMAKE_CACHE_ARGS
     ${default_cmake_args}
+    -Dfletch_BUILD_INSTALL_PREFIX:PATH=${install_prefix}
     -Dfletch_ENABLE_Qt:BOOL=ON
     -Dfletch_ENABLE_ZLib:BOOL=ON
     -Dfletch_ENABLE_PNG:BOOL=ON
