@@ -21,13 +21,21 @@ set(default_cmake_args
   "-DBUILD_DOCUMENTATION:BOOL=OFF"
   "-DENABLE_TESTING:BOOL=OFF"
   )
+ 
+if(WIN32)
+  ExternalProject_Add(FletchDependencies
+  GIT_REPOSITORY https://github.com/Kitware/fletch.git
+  GIT_TAG "master"
+  CMAKE_CACHE_ARGS
+    ${default_cmake_args}
+    -Dfletch_ENABLE_Qt:BOOL=ON
+    -Dfletch_ENABLE_ZLib:BOOL=ON
+    -Dfletch_ENABLE_PNG:BOOL=ON
+    -Dfletch_ENABLE_libjpeg-turbo:BOOL=ON
+  )
+endif()
 
-# Find required external dependencies
-if (NOT WIN32)
-  find_package(Qt4 4.8 REQUIRED)
-else()
-  # fletch qt
-endif()	
+find_package(Qt4 4.8 REQUIRED)
 
 set(qt_args
   -DQT_QMAKE_EXECUTABLE:PATH=${QT_QMAKE_EXECUTABLE}
@@ -159,8 +167,8 @@ if (NOT WIN32)
 else()
   # For Windows, we have to point to a specific version of PythonQt that
   # has a patch to allow it to build with MSVC.	
-  set(VTK_REPO https://github.com/mwoehlke-kitware/PythonQt/)
-  set(VTK_TAG e463adc5a768)
+  set(PYTHONQT_REPO https://github.com/mwoehlke-kitware/PythonQt.git)
+  set(PYTHONQT_TAG e463adc5a768)
 endif()	
 ExternalProject_Add(PythonQt
   GIT_REPOSITORY ${PYTHONQT_REPO}
@@ -371,6 +379,7 @@ ExternalProject_Add(director
     ${lcm_depends}
     ${libbot_depends}
     PythonQt
+    FletchDependencies
     ctkPythonConsole
     QtPropertyBrowser
 
