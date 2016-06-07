@@ -1,7 +1,7 @@
 
 
 option(USE_PCL "Build with PCL." OFF)
-option(USE_LCM "Build with lcm." OFF)
+option(USE_LCM "Build with lcm." ON)
 option(USE_LCMGL "Build with lcm-gl." OFF)
 option(USE_OCTOMAP "Build with octomap." OFF)
 option(USE_LIBBOT "Build with libbot." OFF)
@@ -26,6 +26,7 @@ if(WIN32)
   ExternalProject_Add(FletchDependencies
   GIT_REPOSITORY https://github.com/Kitware/fletch.git
   GIT_TAG "master"
+  INSTALL_COMMAND ""
   CMAKE_CACHE_ARGS
     ${default_cmake_args}
     -Dfletch_BUILD_INSTALL_PREFIX:PATH=${install_prefix}
@@ -34,9 +35,11 @@ if(WIN32)
     -Dfletch_ENABLE_PNG:BOOL=ON
     -Dfletch_ENABLE_libjpeg-turbo:BOOL=ON
   )
+  # we can not find this as it is not there until after fletch builds qt
+  set(QT_QMAKE_EXECUTABLE "${install_prefix}/bin/qmake.exe")
+else()
+  find_package(Qt4 4.8 REQUIRED)
 endif()
-
-find_package(Qt4 4.8 REQUIRED)
 
 set(qt_args
   -DQT_QMAKE_EXECUTABLE:PATH=${QT_QMAKE_EXECUTABLE}
